@@ -30,16 +30,11 @@ class SignInActivity : ComponentActivity() {
 
                 Toast.makeText(
                     this,
-                    "회원가입이 완료되었습니다. 로그인해주세요.",
+                    "회원가입 완료! 로그인해주세요.",
                     Toast.LENGTH_SHORT
                 ).show()
             } catch (e: Exception) {
                 e.printStackTrace()
-                Toast.makeText(
-                    this,
-                    "회원가입은 완료되었으나 정보를 저장하는 중 오류가 발생했습니다.",
-                    Toast.LENGTH_SHORT
-                ).show()
             }
         }
     }

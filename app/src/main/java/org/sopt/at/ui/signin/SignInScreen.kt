@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -65,6 +65,7 @@ fun SignInScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
+
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -164,7 +165,7 @@ fun SignInScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Divider(color = Color.DarkGray, thickness = 1.dp)
+                HorizontalDivider(thickness = 1.dp, color = Color.DarkGray)
 
                 Spacer(modifier = Modifier.height(16.dp))
 

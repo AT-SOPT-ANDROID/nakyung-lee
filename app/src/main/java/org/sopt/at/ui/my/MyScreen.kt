@@ -16,13 +16,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,9 +37,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.painterResource
+import org.sopt.at.R
 import org.sopt.at.ui.theme.TvingRed
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,8 +67,8 @@ fun MyScreen(
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "뒤로가기",
+                            painter = painterResource(id = R.drawable.ic_back_arrow),
+                            contentDescription = "back",
                             tint = Color.White
                         )
                     }
@@ -78,14 +77,14 @@ fun MyScreen(
                     IconButton(onClick = {}) {
                         Icon(
                             imageVector = Icons.Default.Notifications,
-                            contentDescription = "알림",
+                            contentDescription = "notification",
                             tint = Color.White
                         )
                     }
                     IconButton(onClick = { }) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "설정",
+                            contentDescription = "setting",
                             tint = Color.White
                         )
                     }
@@ -95,22 +94,6 @@ fun MyScreen(
                 )
             )
         },
-        bottomBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .background(Color.Black),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                BottomNavItem(label = "HOME", isSelected = false)
-                BottomNavItem(label = "Shorts", isSelected = false, showBadge = true)
-                BottomNavItem(label = "LIVE", isSelected = false)
-                BottomNavItem(label = "SEARCH", isSelected = false)
-                BottomNavItem(label = "HISTORY", isSelected = false)
-            }
-        }
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -162,15 +145,16 @@ fun MyScreen(
                         ),
                         shape = RoundedCornerShape(4.dp),
                         modifier = Modifier
+                            .padding(vertical = 8.dp)
                             .background(
                                 color = Color.DarkGray.copy(alpha = 0.5f),
                                 shape = RoundedCornerShape(4.dp)
                             )
                     ) {
                         Text(
-                            text = "프로필 변경",
+                            text = "프로필 전환",
                             color = Color.White,
-                            fontSize = 12.sp
+                            fontSize = 12.sp,
                         )
                     }
                 }
@@ -303,7 +287,7 @@ fun MenuItemWithArrow(
     ) {
         Text(
             text = text,
-            color = Color.White,
+            color = Color.Gray,
             fontSize = 16.sp
         )
 
@@ -311,43 +295,6 @@ fun MenuItemWithArrow(
             imageVector = Icons.Default.KeyboardArrowRight,
             contentDescription = "더보기",
             tint = Color.Gray
-        )
-    }
-
-    Divider(color = Color.DarkGray.copy(alpha = 0.5f))
-}
-
-@Composable
-fun BottomNavItem(
-    label: String,
-    isSelected: Boolean,
-    showBadge: Boolean = false
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(4.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(24.dp)
-                .background(if (isSelected) TvingRed else Color.Transparent),
-            contentAlignment = Alignment.Center
-        ) {
-            if (showBadge) {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .background(TvingRed, CircleShape)
-                        .align(Alignment.TopEnd)
-                )
-            }
-        }
-
-        Text(
-            text = label,
-            color = if (isSelected) Color.White else Color.Gray,
-            fontSize = 10.sp,
-            textAlign = TextAlign.Center
         )
     }
 }

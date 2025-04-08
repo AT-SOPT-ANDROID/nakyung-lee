@@ -15,7 +15,6 @@ class SignInViewModel(
     private val _uiState = MutableStateFlow(SignInUiState())
     val uiState: StateFlow<SignInUiState> = _uiState.asStateFlow()
 
-
     fun updateUserId(userId: String) {
         _uiState.value = _uiState.value.copy(userId = userId)
     }

@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import org.sopt.at.model.User
 
 class SignUpViewModel : ViewModel() {
     val _uiState = MutableStateFlow(SignUpUiState())
@@ -55,23 +54,6 @@ class SignUpViewModel : ViewModel() {
         }
 
         return isValid
-    }
-
-    fun navigateToNextPage() {
-        when (currentPage.value) {
-            SignUpPage.ID -> {
-                if (validateUserId()) {
-                    _currentPage.value = SignUpPage.PASSWORD
-                }
-            }
-            SignUpPage.PASSWORD -> {
-                if (validatePassword()) {
-                    _uiState.value = _uiState.value.copy(
-                        isRegistrationSuccessful = true
-                    )
-                }
-            }
-        }
     }
 
     fun resetRegistrationState() {

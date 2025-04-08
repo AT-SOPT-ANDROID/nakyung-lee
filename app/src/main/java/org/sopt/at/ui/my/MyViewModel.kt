@@ -5,16 +5,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-/**
- * My 화면의 상태와 동작을 관리하는 ViewModel
- */
 class MyViewModel : ViewModel() {
-
-    // UI 상태 관리하는 StateFlow
     private val _uiState = MutableStateFlow(MyUiState())
     val uiState: StateFlow<MyUiState> = _uiState.asStateFlow()
 
-    // 로그아웃 상태 관리하는 StateFlow
     private val _logoutEvent = MutableStateFlow(false)
     val logoutEvent: StateFlow<Boolean> = _logoutEvent.asStateFlow()
 
