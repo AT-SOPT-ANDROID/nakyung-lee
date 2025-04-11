@@ -290,11 +290,5 @@ fun MenuItemWithArrow(
             color = Color.Gray,
             fontSize = 16.sp
         )
-
-        Icon(
-            imageVector = Icons.Default.KeyboardArrowRight,
-            contentDescription = "더보기",
-            tint = Color.Gray
-        )
     }
 }
