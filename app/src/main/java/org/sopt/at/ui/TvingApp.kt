@@ -65,7 +65,7 @@ fun TvingApp() {
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = if (isLoggedIn) "home" else "home",
+            startDestination = if (isLoggedIn) "home" else "signin",
             modifier = Modifier.padding(paddingValues)
         ) {
             composable("signin") {
