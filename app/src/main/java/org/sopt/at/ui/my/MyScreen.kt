@@ -286,5 +286,11 @@ fun MenuItemWithArrow(
             color = Color.Gray,
             fontSize = 16.sp
         )
+
+        Icon(
+            imageVector = Icons.Default.KeyboardArrowRight,
+            contentDescription = null,
+            tint = Color.Gray
+        )
     }
 }
