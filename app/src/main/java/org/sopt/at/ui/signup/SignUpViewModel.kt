@@ -9,9 +9,6 @@ class SignUpViewModel : ViewModel() {
     val _uiState = MutableStateFlow(SignUpUiState())
     val uiState: StateFlow<SignUpUiState> = _uiState.asStateFlow()
 
-    val _currentPage = MutableStateFlow(SignUpPage.ID)
-    val currentPage: StateFlow<SignUpPage> = _currentPage.asStateFlow()
-
     fun updateUserId(userId: String) {
         _uiState.value = _uiState.value.copy(userId = userId)
     }
@@ -70,8 +67,4 @@ class SignUpViewModel : ViewModel() {
         val passwordError: String? = null,
         val isRegistrationSuccessful: Boolean = false
     )
-
-    enum class SignUpPage {
-        ID, PASSWORD
-    }
 }

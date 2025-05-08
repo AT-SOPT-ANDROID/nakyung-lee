@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.HorizontalDivider
@@ -18,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -127,7 +129,8 @@ fun SignInScreen(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "아이디 찾기",
@@ -136,10 +139,12 @@ fun SignInScreen(
                         modifier = Modifier.clickable {  }
                     )
 
-                    Text(
-                        text = " | ",
-                        color = Color.Gray,
-                        fontSize = 14.sp
+                    VerticalDivider(
+                        modifier = Modifier
+                            .height(14.dp)
+                            .padding(horizontal = 8.dp),
+                        thickness = 1.dp,
+                        color = Color.Gray
                     )
 
                     Text(
@@ -149,10 +154,12 @@ fun SignInScreen(
                         modifier = Modifier.clickable {  }
                     )
 
-                    Text(
-                        text = " | ",
-                        color = Color.Gray,
-                        fontSize = 14.sp
+                    VerticalDivider(
+                        modifier = Modifier
+                            .height(14.dp)
+                            .padding(horizontal = 8.dp),
+                        thickness = 1.dp,
+                        color = Color.Gray
                     )
 
                     Text(

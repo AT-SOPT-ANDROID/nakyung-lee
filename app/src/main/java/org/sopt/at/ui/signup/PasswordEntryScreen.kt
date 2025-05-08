@@ -1,5 +1,6 @@
 package org.sopt.at.ui.signup
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,9 +19,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,22 +39,26 @@ import org.sopt.at.ui.components.TvingTextField
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordEntryScreen(
-    password: String,
-    onPasswordChange: (String) -> Unit,
-    isPasswordVisible: Boolean,
-    onTogglePasswordVisibility: () -> Unit,
-    onNextClick: () -> Unit,
-    onBackClick: () -> Unit,
-    error: String?
+    viewModel: SignUpViewModel,
+    onBackClicked: () -> Unit,
+    onCompleteClicked: () -> Unit
 ) {
+    val uiState by viewModel._uiState.collectAsState()
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
+
+    LaunchedEffect(uiState.passwordError) {
+        uiState.passwordError?.let { error ->
+            Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(onClick = onBackClicked) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_back_arrow),
                             contentDescription = "back",
@@ -88,17 +97,19 @@ fun PasswordEntryScreen(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 TvingTextField(
-                    value = password,
-                    onValueChange = onPasswordChange,
+                    value = uiState.password,
+                    onValueChange = viewModel::updatePassword,
                     label = "비밀번호",
                     isPassword = true,
-                    isPasswordVisible = isPasswordVisible,
-                    onTogglePasswordVisibility = onTogglePasswordVisibility,
+                    isPasswordVisible = uiState.isPasswordVisible,
+                    onTogglePasswordVisibility = viewModel::togglePasswordVisibility,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(
                         onDone = {
                             focusManager.clearFocus()
-                            onNextClick()
+                            if (viewModel.validatePassword()) {
+                                onCompleteClicked()
+                            }
                         }
                     )
                 )
@@ -115,9 +126,13 @@ fun PasswordEntryScreen(
                 Spacer(modifier = Modifier.weight(1f))
 
                 TvingButton(
-                    text = "다음",
-                    onClick = onNextClick,
-                    enabled = password.isNotEmpty()
+                    text = "완료",
+                    onClick = {
+                        if (viewModel.validatePassword()) {
+                            onCompleteClicked()
+                        }
+                    },
+                    enabled = uiState.password.isNotEmpty()
                 )
 
                 Spacer(modifier = Modifier.height(48.dp))

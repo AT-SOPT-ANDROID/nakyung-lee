@@ -60,6 +60,13 @@ fun MyScreen(
         }
     }
 
+    val menuItems = listOf(
+        "이용권 구독" to { },
+        "회원정보 수정" to { },
+        "프로모션 정보 수신 동의" to { },
+        "다운로드" to { }
+    )
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -217,32 +224,21 @@ fun MyScreen(
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
 
-                MenuItemWithArrow(
-                    text = "이용권 구독",
-                    onClick = {  }
-                )
+                menuItems.forEach { (text, onClick) ->
+                    MenuItemWithArrow(
+                        text = text,
+                        onClick = onClick
+                    )
+                }
 
-                MenuItemWithArrow(
-                    text = "회원정보 수정",
-                    onClick = { }
-                )
-
-                MenuItemWithArrow(
-                    text = "프로모션 정보 수신 동의",
-                    onClick = {  }
-                )
-
-                MenuItemWithArrow(
-                    text = "다운로드",
-                    onClick = {  }
-                )
-
-                Text(
-                    text = "다운로드 콘텐츠는 이 곳에서 시청할 수 있어요",
-                    color = Color(0xFF1E88E5),
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(start = 16.dp, bottom = 16.dp)
-                )
+                if (menuItems.any { it.first == "다운로드" }) {
+                    Text(
+                        text = "다운로드 콘텐츠는 이 곳에서 시청할 수 있어요",
+                        color = Color(0xFF1E88E5),
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(start = 16.dp, bottom = 16.dp)
+                    )
+                }
 
                 MenuItemWithArrow(
                     text = "라이브 예약 알림",
@@ -289,6 +285,12 @@ fun MenuItemWithArrow(
             text = text,
             color = Color.Gray,
             fontSize = 16.sp
+        )
+
+        Icon(
+            imageVector = Icons.Default.KeyboardArrowRight,
+            contentDescription = null,
+            tint = Color.Gray
         )
     }
 }
