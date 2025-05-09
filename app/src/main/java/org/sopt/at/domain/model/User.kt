@@ -1,4 +1,4 @@
-package org.sopt.at.model
+package org.sopt.at.domain.model
 
 data class User(
     val userId: String,

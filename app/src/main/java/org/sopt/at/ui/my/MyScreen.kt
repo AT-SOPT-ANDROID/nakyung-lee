@@ -53,12 +53,10 @@ fun MyScreen(
     val uiState by viewModel.uiState.collectAsState()
     val logoutEvent by viewModel.logoutEvent.collectAsState()
 
-    LaunchedEffect(logoutEvent) {
-        if (logoutEvent) {
-            onLogoutClick()
-            viewModel.resetLogoutEvent()
-        }
+    LaunchedEffect (Unit){
+        viewModel.getMyNickName()
     }
+
 
     val menuItems = listOf(
         "이용권 구독" to { },
@@ -70,7 +68,7 @@ fun MyScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {  },
+                title = { },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
@@ -146,7 +144,7 @@ fun MyScreen(
                     Spacer(modifier = Modifier.weight(1f))
 
                     Button(
-                        onClick = {  },
+                        onClick = { },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Transparent
                         ),
@@ -242,13 +240,16 @@ fun MyScreen(
 
                 MenuItemWithArrow(
                     text = "라이브 예약 알림",
-                    onClick = {  }
+                    onClick = { }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
-                    onClick = { viewModel.logout() },
+                    onClick = {
+                        viewModel.logout()
+                        onLogoutClick()
+                    },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.DarkGray
                     ),
