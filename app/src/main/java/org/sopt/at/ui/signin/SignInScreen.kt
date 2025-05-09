@@ -2,16 +2,7 @@ package org.sopt.at.ui.signin
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.HorizontalDivider
@@ -33,6 +24,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
@@ -43,31 +35,31 @@ import org.sopt.at.ui.components.TvingTextField
 fun SignInScreen(
     viewModel: SignInViewModel,
     navigateToSignUp: () -> Unit,
-    navigateToMyView: (String) -> Unit
+    navigateToHome: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
 
-    LaunchedEffect(uiState.isSignInSuccessful) {
-        if (uiState.isSignInSuccessful) {
-            viewModel.resetSignInState()
-            navigateToMyView(uiState.userId)
+    LaunchedEffect(uiState.loginState) {
+        if (uiState.loginState){
+            navigateToHome()
+            viewModel.changeLoginState()
         }
     }
 
-    LaunchedEffect(uiState.signInError) {
-        uiState.signInError?.let { error ->
+    LaunchedEffect(uiState.showSnackBar) {
+        if (uiState.showSnackBar) {
             scope.launch {
-                snackbarHostState.showSnackbar(message = error)
+                snackbarHostState.showSnackbar(message = uiState.errorMessage)
             }
+            viewModel.changeSnackBarVisible( visible = false)
         }
     }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
-
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -107,8 +99,8 @@ fun SignInScreen(
                     onValueChange = viewModel::updatePassword,
                     label = "비밀번호",
                     isPassword = true,
-                    isPasswordVisible = uiState.isPasswordVisible,
-                    onTogglePasswordVisibility = viewModel::togglePasswordVisibility,
+                    isPasswordVisible = uiState.passwordVisible,
+                    onTogglePasswordVisibility = { viewModel.changePasswordVisible(visible = !uiState.passwordVisible) },
                     keyboardActions = KeyboardActions(
                         onDone = {
                             focusManager.clearFocus()
@@ -119,6 +111,7 @@ fun SignInScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // 로그인 버튼
                 TvingButton(
                     text = "로그인하기",
                     onClick = viewModel::signIn,
@@ -136,7 +129,7 @@ fun SignInScreen(
                         text = "아이디 찾기",
                         color = Color.Gray,
                         fontSize = 14.sp,
-                        modifier = Modifier.clickable {  }
+                        modifier = Modifier.clickable { }
                     )
 
                     VerticalDivider(
@@ -151,7 +144,7 @@ fun SignInScreen(
                         text = "비밀번호 찾기",
                         color = Color.Gray,
                         fontSize = 14.sp,
-                        modifier = Modifier.clickable {  }
+                        modifier = Modifier.clickable { }
                     )
 
                     VerticalDivider(

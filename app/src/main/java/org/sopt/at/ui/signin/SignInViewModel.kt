@@ -4,59 +4,68 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.sopt.at.repository.UserRepository
+import org.sopt.at.data.network.AuthService
+import org.sopt.at.data.network.ServicePool
+import org.sopt.at.data.network.dto.RequestSignInDto
+import org.sopt.at.domain.repository.UserRepository
 
-class SignInViewModel(
-    private val userRepository: UserRepository
-) : ViewModel() {
+data class SignInUiState(
+    val userId: String = "",
+    val password: String = "",
+    val passwordVisible: Boolean = false,
+    val showSnackBar:Boolean = false,
+    val errorMessage: String = "",
+    val loginState: Boolean = false,
+)
+class SignInViewModel(private val userRepository: UserRepository) : ViewModel() {
+
+    private val authService: AuthService = ServicePool.userService
 
     private val _uiState = MutableStateFlow(SignInUiState())
-    val uiState: StateFlow<SignInUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<SignInUiState> get() = _uiState
 
-    fun updateUserId(userId: String) {
-        _uiState.value = _uiState.value.copy(userId = userId)
+    fun updateUserId(newId: String) {
+        _uiState.update { it.copy(userId = newId) }
     }
 
-    fun updatePassword(password: String) {
-        _uiState.value = _uiState.value.copy(password = password)
+    fun updatePassword(newPassword: String) {
+        _uiState.update { it.copy(password = newPassword) }
     }
 
-    fun togglePasswordVisibility() {
-        _uiState.value = _uiState.value.copy(
-            isPasswordVisible = !_uiState.value.isPasswordVisible
-        )
+    fun changeSnackBarVisible(visible:Boolean){
+        _uiState.update { it.copy(showSnackBar = visible) }
+    }
+
+    fun changePasswordVisible(visible:Boolean){
+        _uiState.update { it.copy(passwordVisible = visible) }
+    }
+
+    fun changeLoginState(){
+        _uiState.update { it.copy(loginState = !uiState.value.loginState) }
     }
 
     fun signIn() {
+        val current = _uiState.value
+        if (current.userId.isEmpty() || current.password.isEmpty()) {
+            _uiState.update { it.copy(errorMessage = "아이디와 비밀번호를 입력해주세요.") }
+            return
+        }
+
+        val request = RequestSignInDto(current.userId, current.password)
+
         viewModelScope.launch {
-            val userId = _uiState.value.userId
-            val password = _uiState.value.password
-
-            println("로그인 시도 - ID: $userId, Password: $password")
-
-            val isAuthenticated = userRepository.authenticateUser(userId, password)
-
-            _uiState.value = _uiState.value.copy(
-                isSignInSuccessful = isAuthenticated,
-                signInError = if (!isAuthenticated) "아이디 또는 비밀번호가 일치하지 않습니다." else null
-            )
+            val response = authService.signIn(request)
+            if(response.isSuccessful){
+                _uiState.update { it.copy(loginState = true) }
+                userRepository.setLocalUserId(response.body()!!.data!!.userId)
+            }else {
+                _uiState.update {
+                    it.copy(errorMessage = "로그인 실패: ${response.message()}",)
+                }
+                changeSnackBarVisible(visible = true)
+            }
         }
     }
-
-    fun resetSignInState() {
-        _uiState.value = _uiState.value.copy(
-            isSignInSuccessful = false,
-            signInError = null
-        )
-    }
-
-    data class SignInUiState(
-        val userId: String = "",
-        val password: String = "",
-        val isPasswordVisible: Boolean = false,
-        val isSignInSuccessful: Boolean = false,
-        val signInError: String? = null
-    )
 }

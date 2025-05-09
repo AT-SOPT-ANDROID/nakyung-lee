@@ -24,7 +24,7 @@ import org.sopt.at.ui.components.TvingTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun IdEntryScreen(
+fun NicknameEntryScreen(
     viewModel: SignUpViewModel,
     onNextClicked: () -> Unit,
     onBackClicked: () -> Unit
@@ -70,7 +70,7 @@ fun IdEntryScreen(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Text(
-                    text = "아이디를 입력해주세요.",
+                    text = "닉네임을 입력해주세요.",
                     color = Color.White,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
@@ -80,14 +80,14 @@ fun IdEntryScreen(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 TvingTextField(
-                    value = uiState.loginId,
-                    onValueChange = viewModel::updateLoginId,
-                    label = "아이디",
+                    value = uiState.nickname,
+                    onValueChange = viewModel::updateNickname,
+                    label = "닉네임",
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(
                         onDone = {
-                            if (uiState.loginId.isNotEmpty()) {
-                                viewModel.setId(uiState.loginId)
+                            if (uiState.nickname.isNotEmpty()) {
+                                viewModel.setNickname(uiState.nickname)
                                 onNextClicked()
                             }
                         }
@@ -97,7 +97,7 @@ fun IdEntryScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "영문, 숫자 조합 8~20자",
+                    text = "한글/영어/숫자만 사용 가능. 1자 ~ 20자 이내.",
                     color = Color.Gray,
                     fontSize = 12.sp,
                     modifier = Modifier.fillMaxWidth()
@@ -108,12 +108,12 @@ fun IdEntryScreen(
                 TvingButton(
                     text = "다음",
                     onClick = {
-                        if (uiState.loginId.isNotEmpty()) {
-                            viewModel.setId(uiState.loginId)
+                        if (uiState.nickname.isNotEmpty()) {
+                            viewModel.setNickname(uiState.nickname)
                             onNextClicked()
                         }
                     },
-                    enabled = uiState.loginId.isNotEmpty()
+                    enabled = uiState.nickname.isNotEmpty()
                 )
 
                 Spacer(modifier = Modifier.height(48.dp))

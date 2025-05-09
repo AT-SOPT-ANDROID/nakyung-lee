@@ -8,21 +8,22 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.sopt.at.R
-import org.sopt.at.repository.UserRepository
+import org.sopt.at.domain.model.User
+import org.sopt.at.domain.repository.UserRepository
+import org.sopt.at.ui.signin.SignInViewModel
 import org.sopt.at.ui.my.MyScreen
 import org.sopt.at.ui.my.MyViewModel
 import org.sopt.at.ui.screen.HistoryScreen
@@ -31,59 +32,52 @@ import org.sopt.at.ui.screen.LiveScreen
 import org.sopt.at.ui.screen.SearchScreen
 import org.sopt.at.ui.screen.ShortsScreen
 import org.sopt.at.ui.signin.SignInScreen
-import org.sopt.at.ui.signin.SignInViewModel
 import org.sopt.at.ui.signup.IdEntryScreen
+import org.sopt.at.ui.signup.NicknameEntryScreen
 import org.sopt.at.ui.signup.PasswordEntryScreen
 import org.sopt.at.ui.signup.SignUpViewModel
 
 @Composable
 fun TvingApp() {
+    val context = LocalContext.current
     val navController = rememberNavController()
-    val userRepository = remember { UserRepository() }
+    val userRepository = remember { UserRepository(context = context) }
     val signInViewModel = remember { SignInViewModel(userRepository) }
     val signUpViewModel = remember { SignUpViewModel() }
-    val myViewModel = remember { MyViewModel() }
+    val myViewModel = remember { MyViewModel(userRepository) }
 
-    var isLoggedIn by remember { mutableStateOf(false) }
-
-    LaunchedEffect(myViewModel.logoutEvent) {
-        if (myViewModel.logoutEvent.value) {
-            isLoggedIn = false
-            navController.navigate("signin") {
-                popUpTo(navController.graph.startDestinationId) { inclusive = true }
-            }
-            myViewModel.resetLogoutEvent()
-        }
-    }
+    val isLoggedIn = remember{MutableStateFlow(userRepository.isLoggedIn())}
 
     Scaffold(
         bottomBar = {
-            if (isLoggedIn) {
+            if (isLoggedIn.value) {
                 TvingBottomNavigation(navController)
             }
         }
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = if (isLoggedIn) "home" else "signin",
+            startDestination = if (isLoggedIn.value) "home" else "signin",
             modifier = Modifier.padding(paddingValues)
         ) {
             composable("signin") {
                 SignInScreen(
                     viewModel = signInViewModel,
                     navigateToSignUp = { navController.navigate("signup/id") },
-                    navigateToMyView = { userId ->
-                        isLoggedIn = true
-                        myViewModel.setUserInfo(userId)
-                        navController.navigate("home") {
-                            popUpTo("signin") { inclusive = true }
-                        }
-                    }
+                    navigateToHome = { navController.navigate("home") }
                 )
             }
 
             composable("signup/id") {
                 IdEntryScreen(
+                    viewModel = signUpViewModel,
+                    onBackClicked = { navController.popBackStack() },
+                    onNextClicked = { navController.navigate("signup/nickname") }
+                )
+            }
+
+            composable("signup/nickname") {
+                NicknameEntryScreen(
                     viewModel = signUpViewModel,
                     onBackClicked = { navController.popBackStack() },
                     onNextClicked = { navController.navigate("signup/password") }
@@ -95,18 +89,18 @@ fun TvingApp() {
                     viewModel = signUpViewModel,
                     onBackClicked = { navController.popBackStack() },
                     onCompleteClicked = {
-                        if (signUpViewModel.validatePassword()) {
                             userRepository.registerUser(
-                                org.sopt.at.model.User(
-                                    signUpViewModel.uiState.value.userId,
+                                User(
+                                    signUpViewModel.uiState.value.loginId,
                                     signUpViewModel.uiState.value.password
                                 )
                             )
                             navController.navigate("signin") {
                                 popUpTo("signin") { inclusive = true }
                             }
-                        }
-                    }
+
+                    },
+                    signInSuccess = {isLoggedIn.value =true}
                 )
             }
 
@@ -138,7 +132,9 @@ fun TvingApp() {
                 MyScreen(
                     viewModel = myViewModel,
                     onBackClick = { navController.popBackStack() },
-                    onLogoutClick = { myViewModel.logout() }
+                    onLogoutClick = { navController.navigate("signin")
+                    userRepository.isLoggedIn()
+                    }
                 )
             }
         }

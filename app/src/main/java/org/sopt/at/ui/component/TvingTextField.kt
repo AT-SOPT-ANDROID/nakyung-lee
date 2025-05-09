@@ -27,7 +27,7 @@ fun TvingTextField(
     modifier: Modifier = Modifier,
     isPassword: Boolean = false,
     isPasswordVisible: Boolean = false,
-    onTogglePasswordVisibility: (() -> Unit)? = null,
+    onTogglePasswordVisibility:()->Unit = {},
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default
 ) {

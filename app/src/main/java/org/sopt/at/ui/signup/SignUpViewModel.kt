@@ -1,70 +1,97 @@
 package org.sopt.at.ui.signup
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import org.sopt.at.data.network.AuthService
+import org.sopt.at.data.network.ServicePool
+import org.sopt.at.data.network.dto.RequestSignUpDto
+import org.sopt.at.data.network.dto.ResponseSignUpDto
+
+data class SignUpUiState(
+    val loginId: String = "",
+    val password: String = "",
+    val nickname: String = "",
+    val isPasswordVisible: Boolean = false,
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null,
+)
 
 class SignUpViewModel : ViewModel() {
-    val _uiState = MutableStateFlow(SignUpUiState())
+    private val _uiState = MutableStateFlow(SignUpUiState())
     val uiState: StateFlow<SignUpUiState> = _uiState.asStateFlow()
+    private val authService: AuthService = ServicePool.userService
 
-    fun updateUserId(userId: String) {
-        _uiState.value = _uiState.value.copy(userId = userId)
+
+    fun updateLoginId(id: String) {
+        _uiState.update { it.copy(loginId = id) }
     }
 
-    fun updatePassword(password: String) {
-        _uiState.value = _uiState.value.copy(password = password)
+    fun updatePassword(pw: String) {
+        _uiState.update { it.copy(password = pw) }
+    }
+
+    fun updateNickname(nick: String) {
+        _uiState.update { it.copy(nickname = nick) }
     }
 
     fun togglePasswordVisibility() {
-        _uiState.value = _uiState.value.copy(isPasswordVisible = !_uiState.value.isPasswordVisible)
+        _uiState.update { it.copy(isPasswordVisible = !it.isPasswordVisible) }
     }
 
-    fun validateUserId(): Boolean {
-        val userId = _uiState.value.userId
-        val idPattern = "^[a-zA-Z0-9]{6,12}$".toRegex()
-
-        val isValid = idPattern.matches(userId)
-        if (!isValid) {
-            _uiState.value = _uiState.value.copy(
-                idError = "아이디는 영문 대/소문자 또는 영문 소문자, 숫자 조합 6~12자리여야 합니다."
-            )
-        } else {
-            _uiState.value = _uiState.value.copy(idError = null)
-        }
-
-        return isValid
+    fun setId(id: String) {
+        _uiState.update { it.copy(loginId = id) }
     }
 
-    fun validatePassword(): Boolean {
-        val password = _uiState.value.password
-        val passwordPattern = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[~!@#\$%^&*])[A-Za-z\\d~!@#\$%^&*]{8,15}$".toRegex()
-
-        val isValid = passwordPattern.matches(password)
-        if (!isValid) {
-            _uiState.value = _uiState.value.copy(
-                passwordError = "비밀번호는 영문, 숫자, 특수문자(~!@#$%^&*) 조합 8~15자리여야 합니다."
-            )
-        } else {
-            _uiState.value = _uiState.value.copy(passwordError = null)
-        }
-
-        return isValid
+    fun setNickname(nick: String) {
+        _uiState.update { it.copy(nickname = nick) }
     }
 
-    fun resetRegistrationState() {
-        _uiState.value = _uiState.value.copy(
-            isRegistrationSuccessful = false
+    fun singUpClicked(password: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        _uiState.update { it.copy(password = password) }
+        signUp(onSuccess = onSuccess, onFailure = onFailure)
+    }
+
+    private fun signUp(onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        val signUpRequest = RequestSignUpDto(
+            loginId = _uiState.value.loginId,
+            nickname = _uiState.value.nickname,
+            password = _uiState.value.password
         )
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            try {
+                val response = authService.signUp(signUpRequest)
+
+                if (response.isSuccessful) {
+                    Log.e("zz", "success" + response.message().toString())
+                    _uiState.update { it.copy(errorMessage = response.body()?.message ?: "") }
+                    onSuccess()
+                } else{
+                    val error = response.errorBody()?.string().toString()
+
+                    val errorMessage = try {
+                        val parsedError = Json.decodeFromString<ResponseSignUpDto>(error ?: "")
+                        parsedError.message
+                    } catch (e: Exception) {
+                        "오류 메시지를 불러올 수 없습니다."
+                    }
+
+                    _uiState.update { it.copy(isLoading = false, errorMessage = errorMessage) }
+                    onFailure(errorMessage)
+
+                }
+            } catch (e: Exception) {
+                val error = e.message ?: "네트워크 오류"
+                _uiState.update { it.copy(isLoading = false, errorMessage = error) }
+                onFailure(error)
+            }
+        }
     }
 
-    data class SignUpUiState(
-        val userId: String = "",
-        val password: String = "",
-        val isPasswordVisible: Boolean = false,
-        val idError: String? = null,
-        val passwordError: String? = null,
-        val isRegistrationSuccessful: Boolean = false
-    )
 }
